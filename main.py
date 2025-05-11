@@ -238,3 +238,90 @@ with open('path_planning_output.txt', 'w') as f:
     f.write("\nExplored Points (Visited Nodes):\n")
     f.write(f"{[tuple(map(int, pos)) for pos in shortest_visited]}\n")
 
+def run_path_planning():
+    # Maze definition (1: wall, 0: space, -1: start, 9: target)
+    maze = np.array([
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, -1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 9, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+        [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1],
+        [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+        [1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ])
+    start = tuple(map(int, np.argwhere(maze == -1)[0]))
+    empty_cells = list(zip(*np.where(maze == 0)))
+    np.random.seed(142)
+    num_targets = np.random.randint(2, 5)
+    possible_targets = [cell for cell in empty_cells if cell != start]
+    target_indices = np.random.choice(len(possible_targets), num_targets, replace=False)
+    target_points = [possible_targets[i] for i in target_indices]
+    BORDER_THICKNESS = 1
+    BORDER_VALUE = 2
+    ROWS, COLS = 12, 24
+    maze_with_border = np.full((ROWS + 2 * BORDER_THICKNESS, COLS + 2 * BORDER_THICKNESS), BORDER_VALUE, dtype=int)
+    maze_with_border[BORDER_THICKNESS:ROWS + BORDER_THICKNESS, BORDER_THICKNESS:COLS + BORDER_THICKNESS] = maze
+    start_offset = (start[0] + BORDER_THICKNESS, start[1] + BORDER_THICKNESS)
+    target_points_offset = [(r + BORDER_THICKNESS, c + BORDER_THICKNESS) for r, c in target_points]
+    maze_targets = maze_with_border.copy()
+    for r, c in target_points_offset:
+        maze_targets[r, c] = 9
+    def a_star(maze, start, end):
+        heap = [Node(start, 0, abs(start[0]-end[0]) + abs(start[1]-end[1]), None)]
+        visited = set()
+        nodes_expanded = 0
+        while heap:
+            current = heapq.heappop(heap)
+            r, c = current.pos
+            if current.pos in visited:
+                continue
+            visited.add(current.pos)
+            nodes_expanded += 1
+            if current.pos == end:
+                path = []
+                while current:
+                    path.append(current.pos)
+                    current = current.parent
+                path.reverse()
+                return path, nodes_expanded, visited
+            for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < ROWS + 2 * BORDER_THICKNESS and 0 <= nc < COLS + 2 * BORDER_THICKNESS and maze[nr, nc] in [0, 9] and (nr, nc) not in visited:
+                    h = abs(nr - end[0]) + abs(nc - end[1])
+                    heapq.heappush(heap, Node((nr, nc), current.g + 1, h, current))
+        return None, nodes_expanded, set()
+    def total_path_length(path):
+        if not path or len(path) < 2:
+            return 0
+        return sum(abs(path[i][0] - path[i-1][0]) + abs(path[i][1] - path[i-1][1]) for i in range(1, len(path)))
+    all_orders = list(itertools.permutations(target_points_offset))
+    shortest_length = float('inf')
+    start_time = time.time()
+    for order in all_orders:
+        curr_pos = start_offset
+        order_path = []
+        order_length = 0
+        for tgt in order:
+            maze_tmp = maze_targets.copy()
+            for t in target_points_offset:
+                if t != tgt:
+                    maze_tmp[t] = 9
+                else:
+                    maze_tmp[t] = 0
+            path_, _, _ = a_star(maze_tmp, curr_pos, tgt)
+            if path_ is None:
+                break
+            order_path.extend(path_[1:] if order_path else path_)
+            order_length += total_path_length(path_)
+            curr_pos = tgt
+        else:
+            if order_length < shortest_length:
+                shortest_length = order_length
+    end_time = time.time()
+    return end_time - start_time
+

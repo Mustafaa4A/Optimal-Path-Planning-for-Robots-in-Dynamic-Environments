@@ -14,7 +14,7 @@ Optimal Path:
 Performance Metrics:
 ------------------
 Nodes expanded: 163
-Computation time: 0.0075 seconds
+Computation time: 0.0081 seconds
 Number of targets: 3
 
 Target Positions:
