@@ -4,7 +4,7 @@ Optimal Path Planning for Robots in Dynamic Environments
 Start Position: (2, 2)
 
 Target Order: 
-((8, 8), (2, 13), (10, 19))
+((9, 18), (7, 7), (1, 12))
 
 Total Path Length: 51
 
@@ -14,7 +14,6 @@ Optimal Path:
 Performance Metrics:
 ------------------
 Nodes expanded: 163
-Computation time: 0.0081 seconds
 Number of targets: 3
 
 Target Positions:

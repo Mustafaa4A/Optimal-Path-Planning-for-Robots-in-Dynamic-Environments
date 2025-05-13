@@ -1,7 +1,7 @@
 # CS1001 Advanced Algorithms Project: Optimal Path Planning for Robots in Dynamic Environments
 
 ## Description
-This project implements an A* based path planner for a robot navigating a 2D maze with multiple targets. The robot must find the shortest path visiting all targets while avoiding obstacles. The solution implements a Traveling Salesman Problem (TSP) approach for optimal target ordering.
+This project implements an A* based path planner for a robot navigating a 2D maze with multiple targets. The robot must find the shortest path visiting all targets while avoiding obstacles. The solution implements a Traveling Salesman Problem (TSP) approach for optimal target ordering and uses a maze with dynamically placed targets.
 
 ## Key Features
 
@@ -11,50 +11,52 @@ This project implements an A* based path planner for a robot navigating a 2D maz
 - Uses numpy's random seed for reproducibility
 
 ### 2. Path Planning
-- Implements A* algorithm for optimal path finding
-- Uses Manhattan distance as heuristic
-- Handles obstacle avoidance
-- Solves TSP for optimal target ordering
+- Implements A* algorithm for optimal pathfinding
+- Uses Manhattan distance as heuristic for estimating cost
+- Handles obstacle avoidance and navigation in a dynamic environment
+- Solves Traveling Salesman Problem (TSP) for optimal target ordering
 
 ### 3. Visualization
 - Real-time animation of path exploration
 - Custom color scheme for clear visualization
-- Saves both GIF animation, PNG result and TXT file for detailed statistics
+- Saves both GIF animation, PNG result, and TXT file for detailed statistics
 - Displays explored nodes and optimal path
 
 ### 4. Performance Metrics
-- Tracks computation time
-- Counts nodes expanded
+- Tracks computation time for pathfinding
+- Counts nodes expanded during the search
 - Measures total path length
-- Records target visit order
+- Records the target visit order and explores nodes
 
 ### 5. Output Files
-- `a_star_multi_target.gif`: Animation of path finding
-- `a_star_multi_target_result.png`: Final path visualization
-- `path_planning_output.txt`: Detailed statistics and metrics
+- `a_star_target.gif`: Animation of pathfinding
+- `a_star_target_result.png`: Final path visualization in PNG format
+- `path_planning_output.txt`: Detailed statistics, including optimal path, nodes expanded, and target positions
 
 ## Code Structure
 
 ### 1. Maze Setup
 - Maze definition (12x24 grid)
-- Border addition
-- Target generation
+- Border addition around the maze to ensure proper boundaries
+- Random target generation within valid positions
 - Start position initialization
 
 ### 2. Core Classes
-- `Node`: Represents a position in the maze with path costs
-- Custom color mapping for visualization
+- `Node`: Represents a position in the maze with associated path costs (`g`, `h`, `f`) and parent node
+- `PathPlanner`: Handles the A* pathfinding logic, maze setup, and target ordering logic using permutations
+- `Visualizer`: Manages the visualization of the pathfinding process, including real-time updates and animation generation
 
 ### 3. Key Functions
-- `a_star()`: Main path finding algorithm
-- `total_path_length()`: Calculates path distance
-- `update()`: Animation frame update function
+- `a_star()`: Implements the A* pathfinding algorithm
+- `total_path_length()`: Calculates the total distance of the planned path
+- `update_animation()`: Animation update function for real-time exploration visualization
+- `save_visualization()`: Saves the generated visualization as GIF and PNG files
 
 ### 4. Main Algorithm Flow
-- Generate random targets
-- Find optimal target order
-- Calculate paths between targets
-- Visualize and save results
+- Generate random target points in the maze
+- Find the optimal path by considering all possible orders of target visits (TSP approach)
+- Visualize the exploration process and final path
+- Save results and performance metrics to output files
 
 ## Requirements
 - Python 3.x
@@ -65,47 +67,3 @@ This project implements an A* based path planner for a robot navigating a 2D maz
 ## Installation
 ```bash
 pip install matplotlib numpy pillow
-```
-
-## Usage
-1. Clone the code
-2. Install the required packages
-3. Run the script:
-```bash
-python main.py 
-```
-
-4. Output files will be generated in the current directory:
-   - `a_star_multi_target.gif`
-   - `a_star_multi_target_result.png`
-   - `path_planning_output.txt`
-
-## Customization
-- Adjust `ROWS` and `COLS` for different maze sizes
-- Modify `BORDER_THICKNESS` for border width
-- Change color scheme in `custom_cmap`
-- Adjust animation speed (interval parameter)
-- Modify number of targets (`num_targets`)
-
-## Color Scheme
-- Walls: Light green
-- Free space: Off-white
-- Path: Orange line
-- Start: Blue star
-- Targets: Red circles
-- Explored nodes: Light yellow
-
-## Output Example
-The program generates three main output files:
-1. An animated GIF showing the path-finding process
-2. A PNG image of the final optimal path
-3. A text file containing detailed statistics and metrics
-
-## Author
-Mustaf Abubakar Abdullahi (MCS240014)
-
-## Version
-1.0.0
-
-## License
-This project is part of the CS1001 Advanced Algorithms course. 
